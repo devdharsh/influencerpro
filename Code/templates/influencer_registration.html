@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Influencer Registration</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lobster:wght@400&display=swap">
+    <!-- Custom CSS -->
+    <style>
+        body {
+            font-family: 'Lobster', cursive;
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .flash.error {
+            background-color: #dc3545; /* Red color for error messages */
+        }
+        
+        .navbar {
+            margin-bottom: 30px;
+            background-color: #e3f2fd;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .flash {
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 1rem;
+            text-align: center;
+            display: none; /* Hide by default, show with JavaScript */
+        }
+
+        .flash.danger {
+            background-color: #dc3545;
+        }
+
+        .flash.success {
+            background-color: #28a745;
+        }
+
+        .flash.info {
+            background-color: #17a2b8;
+        }
+
+        .flash.warning {
+            background-color: #ffc107;
+        }
+        .navbar-brand {
+            font-size: 1.8rem;
+            color: #ff0095;
+        }
+        .nav-link {
+            color: #4d10f3;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #3c08d1;
+        }
+        .navbar-nav .nav-item.active .nav-link {
+            color: #d81b60;
+        }
+        .registration-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .registration-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #ff0095;
+            font-weight: 500;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .form-control {
+            border-radius: 5px;
+            border-color: #ff0095;
+        }
+        .form-control:focus {
+            box-shadow: 0 0 0 0.2rem rgba(255, 0, 149, 0.25);
+        }
+        .form-label {
+            font-weight: 500;
+            color: #343a40;
+        }
+        .btn-custom {
+            background-color: #ff0095;
+            color: white;
+            border: none;
+            width: 100%;
+            border-radius: 5px;
+        }
+        .form-control[multiple] {
+            height: auto; /* Adjust the height to fit multiple options */
+            overflow-y: auto; /* Add vertical scroll if options exceed container height */
+            box-shadow: inset 0 0 0 1px #ced4da;
+            border: 1px solid #ced4da;
+        }
+        
+        .form-control[multiple] option:checked {
+            background-color: #007bff; /* Highlight selected options */
+            color: #fff;
+        }
+        .btn-custom:hover {
+            background-color: #e60084;
+        }
+    </style>
+</head>
+<body>
+    <div class="registration-page">
+        <div class="registration-container">
+            <h2>Influencer Registration</h2>
+            <form method="POST" enctype="multipart/form-data" class="registration-form">
+                <div class="form-group">
+                    <label for="username" class="form-label">Influencer/Channel Name:</label>
+                    <input type="text" id="username" name="username" class="form-control" required />
+                </div>
+                <div class="form-group">
+                    <label for="password" class="form-label">Password:</label>
+                    <input type="password" id="password" name="password" class="form-control" required />
+                </div>
+                <div class="form-group">
+                    <label for="email" class="form-label">Email:</label>
+                    <input type="email" id="email" name="email" class="form-control" required />
+                </div>
+                <div class="form-group">
+                    <label for="followers" class="form-label">Followers:</label>
+                    <input type="number" id="followers" name="followers" class="form-control" required />
+                </div>
+                <div class="form-group">
+                    <label for="rating" class="form-label">Rating (0-5):</label>
+                    <input type="number" id="rating" name="rating" class="form-control" required />
+                </div>
+                <div class="form-group">
+                    <label for="category" class="form-label">Niche/Category:</label>
+                    <select id="category" name="category" class="form-control" required>
+                        <option value="Beauty and Fashion">Beauty and Fashion</option>
+                        <option value="Gaming">Gaming</option>
+                        <option value="Lifestyle">Lifestyle</option>
+                        <option value="Technology">Tech</option>
+                        <option value="Education">Educational</option>
+                        <option value="Food">Food</option>
+                        <option value="Travel">Travel</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="profile_pic" class="form-label">Profile Picture:</label>
+                    <input type="file" id="profile_pic" name="profile_pic" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="mobile">Mobile Number:</label>
+                    <input type="tel" id="mobile" name="mobile" pattern="[0-9]{10}" placeholder="1234567890" required />
+                </div>
+                <div class="form-group">
+                    <label for="content-style" class="form-label">Content Style:</label>
+                    <select id="content-style" name="content_style" class="form-control">
+                        <option value="reviews">Reviews</option>
+                        <option value="tutorials">Tutorials</option>
+                        <option value="vlogs">Vlogs</option>
+                        <option value="hauls">Hauls</option>
+                        <option value="unboxings">Unboxings</option>
+                        <option value="challenges">Challenges</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="languages" class="form-label">Languages Spoken:</label>
+                    <select id="languages" name="languages" class="form-control">
+                        <option value="english">English</option>
+                        <option value="tamil">Tamil</option>
+                        <option value="telugu">Telugu</option>
+                        <option value="spanish">Spanish</option>
+                        <option value="french">French</option>
+                        <option value="german">German</option>
+                        <option value="hindi">Hindi</option>
+                        <option value="arabic">Arabic</option>
+                        <option value="portuguese">Portuguese</option>
+                        <option value="russian">Russian</option>
+                        <option value="japanese">Japanese</option>
+                        <option value="korean">Korean</option>
+                        <option value="italian">Italian</option>
+                        <option value="turkish">Turkish</option>
+                        <option value="dutch">Dutch</option>
+                        <option value="vietnamese">Vietnamese</option>
+                        <option value="bengali">Bengali</option>
+                        <option value="urdu">Urdu</option>
+                    </select>
+                <div class="form-group">
+                    <label for="platform" class="form-label">Platform Presence:</label>
+                    <select id="platform" name="platform" class="form-control" required>
+                        <option value="Youtube">YouTube</option>
+                        <option value="Instagram">Instagram</option>
+                        <option value="Twitter">Twitter</option>
+                        <option value="Facebook">Facebook</option>
+                    </select>
+                </div>
+                <input type="hidden" name="role" value="influencer" />
+                <button type="submit" class="btn btn-custom mt-3">Register</button>
+            </form>
+        </div>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+    <div class="flashes">
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#languages').select2({
+                placeholder: "Select languages",
+                allowClear: true
+            });
+        });
+        $(document).ready(function() {
+            $('.flash').each(function() {
+                $(this).slideDown('slow').delay(3000).slideUp('slow');
+            });
+        });
+    </script>
+    
+</body>
+</html>

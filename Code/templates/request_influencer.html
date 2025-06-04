@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Request Influencer</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap">
+    <!-- Custom CSS -->
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .flash {
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 1rem;
+            text-align: center;
+            display: none; /* Hide by default, show with JavaScript */
+        }
+
+        .flash.danger {
+            background-color: #dc3545;
+        }
+
+        .flash.success {
+            background-color: #28a745;
+        }
+        .flash.error {
+            background-color: #dc3545; /* Red color for error messages */
+        }
+        
+        .flash.info {
+            background-color: #17a2b8;
+        }
+
+        .flash.warning {
+            background-color: #ffc107;
+        }
+        .navbar {
+            margin-bottom: 20px;
+            background-color: #e3f2fd; /* Light blue background */
+        }
+        .nav-link {
+            margin-right: 20px;
+            color: #007bff !important;
+            font-weight: 500;
+        }
+        .nav-link:hover {
+            color: #0056b3 !important;
+        }
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .dashboard-section {
+            margin-top: 20px;
+        }
+        .campaign-card {
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #007bff; /* Blue color for headings */
+            margin-bottom: 20px;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        {% if user.role=='influencer' %}
+            <a class="navbar-brand" href="{{ url_for('influencer_dashboard') }}">Influencer Dashboard</a>
+        {% else %}
+            <a class="navbar-brand" href="{{ url_for('sponsor_dashboard') }}">Sponsor Dashboard</a>
+        {% endif %}
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('profile') }}">Profile</a>
+                </li>
+                {% if user.role=='sponsor' %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('campaigns') }}">Campaigns</a>
+                </li>
+                {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('find_campaigns') }}">Find</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('stats') }}">Stats</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h1>Request Influencer for Campaign</h1>
+        <div class="campaign-card">
+            <h2>{{ campaign.title }}</h2>
+            <p><strong>Description:</strong> {{ campaign.description }}</p>
+            <p><strong>Niche:</strong> {{ campaign.niche }}</p>
+            <p><strong>Date:</strong> {{ campaign.start_date.strftime('%Y-%m-%d') }}</p>
+        </div>
+        <form method="POST">
+            <button type="submit" class="btn btn-primary">Send Request</button>
+        </form>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+    <div class="flashes">
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <!-- JS Libraries -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.flash').each(function() {
+                $(this).slideDown('slow').delay(3000).slideUp('slow');
+            });
+        });
+    </script>
+</body>
+</html>

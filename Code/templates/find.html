@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Campaigns</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lobster:wght@400&display=swap">
+    <!-- Custom CSS -->
+    <style>
+        body {
+            font-family: 'Lobster', cursive;
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .flash {
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 1rem;
+            text-align: center;
+            display: none; /* Hide by default, show with JavaScript */
+        }
+
+        .flash.danger {
+            background-color: #dc3545;
+        }
+
+        .flash.success {
+            background-color: #28a745;
+        }
+
+        .flash.info {
+            background-color: #17a2b8;
+        }
+
+        .flash.warning {
+            background-color: #ffc107;
+        }
+        .navbar {
+            margin-bottom: 30px;
+            background-color: #e3f2fd;
+            border-bottom: 1px solid #ddd;
+        }
+        .navbar-brand {
+            font-size: 1.8rem;
+            color: #ff0095;
+        }
+        .flash.error {
+            background-color: #dc3545; /* Red color for error messages */
+        }
+        
+        .nav-link {
+            color: #4d10f3;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #3c08d1;
+        }
+        .dashboard-section, .table-container {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .btn-custom {
+            background-color: #ff0095;
+            color: white;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+        .btn-custom:hover {
+            background-color: #e60084;
+        }
+        .btn-info {
+            background-color: #17a2b8;
+            color: white;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+        .btn-info:hover {
+            background-color: #117a8b;
+        }
+        .form-control {
+            border-radius: 5px;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
+            border: 1px solid #ced4da;
+            padding: 10px;
+        }
+        .form-control:focus {
+            border-color: #ff0095;
+            box-shadow: 0 0 0 0.2rem rgba(255, 0, 149, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light">
+        {% if user.role == 'influencer' %}
+            <a class="navbar-brand" href="{{ url_for('influencer_dashboard') }}">Influencer Dashboard</a>
+        {% endif %}
+        {% if user.role == 'sponsor' %}
+            <a class="navbar-brand" href="{{ url_for('sponsor_dashboard') }}">Sponsor Dashboard</a>
+        {% endif %}
+        {% if user.role == 'admin' %}
+            <a class="navbar-brand" href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
+        {% endif %}
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                {% if user.role == 'sponsor' or user.role=='influencer' %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('profile') }}">Profile</a>
+                </li>
+                {% endif %}
+                {% if user.role == 'sponsor' %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('campaigns') }}">Campaigns</a>
+                </li>
+                {% endif %}
+                {% if user.role == 'admin' %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{url_for('admin_dashboard_info')}}">Info</a>
+                </li>
+                {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('find_campaigns') }}">Find</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('stats') }}">Stats</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="container dashboard-section">
+        <h1 class="mb-4">Find Campaigns</h1>
+        <form method="POST" action="{{ url_for('find_campaigns') }}">
+
+            {% if user.role=='influencer' or user.role=='sponsor' %}
+                <div class="form-group">
+                    <label for="niche">Niche</label>
+                    <input type="text" class="form-control" id="niche" name="niche" placeholder="Enter niche">
+                </div>
+                <div class="form-group">
+                    <label for="date">Date</label>
+                    <input type="date" class="form-control" id="date" name="date">
+                </div>
+            {% else %}
+                <h2>Search</h2>
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" placeholder="Search...">
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" type="button">Filter</button>
+                    </div>
+                </div>
+            {% endif %}
+
+            <button type="submit" class="btn btn-custom">Find</button>
+        </form>
+
+        {% if campaigns %}
+        <h2 class="mt-5">Campaign Results</h2>
+        <div class="table-container">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Title</th>                       
+                        <th>Niche</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for campaign in campaigns %}
+                    <tr>
+                        <td>{{ campaign.title }}</td>
+                        <td>{{ campaign.niche }}</td>
+                        <td>{{ campaign.start_date.strftime('%Y-%m-%d') }}</td>
+                        <td>
+                            <a href="{{ url_for('view_campaign', campaign_id=campaign.id) }}" class="btn btn-info btn-sm">View</a>
+                            {% if user.role == 'influencer' %}
+                                <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#requestModal" data-campaign-id="{{ campaign.id }}" data-campaign-title="{{ campaign.title }}">Request</button>
+                                <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#removeModal" data-campaign-id="{{ campaign.id }}">Remove</button>
+                            {% endif %}
+                            {% if user.role == 'sponsor' %}
+                                <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#removeModal" data-campaign-id="{{ campaign.id }}">Remove</button>
+                            {% endif %}
+                            {% if user.role == 'admin' %}
+                                <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#flagModal" data-campaign-id="{{ campaign.id }}" data-type="campaign">Flag Campaign</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="mt-3">No campaigns found.</p>
+        {% endif %}
+        {% if user.role=='sponsor' or user.role=='admin' %}
+        <h2 class="mt-5">Available Influencers</h2>
+        {% if influencers %}
+        <div class="table-container">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Category</th>
+                        <th>Platform</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for influencer in influencers %}
+                    <tr>
+                        <td>{{ influencer.username }}</td>
+                        <td>{{ influencer.email }}</td>
+                        <td>{{ influencer.category }}</td>
+                        <td>{{ influencer.platform }}</td>
+                        <td>
+                            <a href="{{ url_for('view_profile', user_id=influencer.id) }}" class="btn btn-info btn-sm">View Profile</a>
+                            {% if user.role == 'admin' %}
+                                <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#flagModal" data-user-id="{{ influencer.id }}" data-type="user">Flag User</button>
+                            {% endif %}
+                            {% if user.role == 'sponsor' or user.role == 'influencer' %}
+                                <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#removeModal" data-user-id="{{ influencer.id }}">Remove</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="mt-3">No influencers found.</p>
+        {% endif %}
+        </div>
+        {% endif %}
+        <div class="container dashboard-section">
+            {% if user.role=='admin' %}
+                <h2 class="mt-5">Available Sponsors</h2>
+                {% if sponsors %}
+                    <div class="table-container">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Category</th>
+                                    <th>Platform</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sponsor in sponsors %}
+                                    <tr>
+                                        <td>{{ sponsor.username }}</td>
+                                        <td>{{ sponsor.email }}</td>
+                                        <td>{{ sponsor.category }}</td>
+                                        <td>{{ sponsor.platform }}</td>
+                                        <td>
+                                            <a href="{{ url_for('view_profile', user_id=sponsor.id) }}" class="btn btn-info btn-sm">View Profile</a>
+                                            {% if user.role == 'admin' %}
+                                                <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#flagModal" data-user-id="{{ sponsor.id }}" data-type="user">Flag User</button>
+                                            {% endif %}
+
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="mt-3">No sponsors found.</p>
+                {% endif %}
+            {% endif %}
+        </div> <!-- This should close the outermost container div -->
+        
+    <!-- Modal -->
+    <div class="modal fade" id="requestModal" tabindex="-1" role="dialog" aria-labelledby="requestModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form method="POST" action="{{ url_for('request_influencer') }}">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="requestModalLabel">Request to Join Campaign</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="campaign_id" name="campaign_id">
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                            <textarea class="form-control" id="message" name="message" rows="3" placeholder="Type your message here..."></textarea>
+                        </div>                        
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Send Request</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="flagModal" tabindex="-1" role="dialog" aria-labelledby="flagModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form method="POST" action="{{ url_for('flag') }}">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="flagModalLabel">Flag</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="flagged_user_id" name="flagged_user_id">
+                        <input type="hidden" id="flagged_campaign_id" name="flagged_campaign_id">
+                        <div class="form-group">
+                            <label for="reason">Reason for Flagging</label>
+                            <textarea class="form-control" id="reason" name="reason" rows="3" placeholder="Enter reason..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Submit Flag</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Remove Modal -->
+<div class="modal fade" id="removeModal" tabindex="-1" role="dialog" aria-labelledby="removeModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('remove_item') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="removeModalLabel">Remove</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="remove_user_id" name="user_id">
+                    <input type="hidden" id="remove_campaign_id" name="campaign_id">
+                    <p>Are you sure you want to permanently remove this item? This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger">Remove</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+    
+    {% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+    <div class="flashes">
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <script>
+        function flagItem(flaggedUserId, flaggedCampaignId, reason) {
+            fetch('/flag', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    'flagged_user_id': flaggedUserId,
+                    'flagged_campaign_id': flaggedCampaignId,
+                    'reason': reason
+                })
+            }).then(response => {
+                if (response.ok) {
+                    alert('Flag has been submitted successfully.');
+                } else {
+                    alert('Failed to submit flag.');
+                }
+            });
+        }
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <!-- JavaScript to populate the modal with data -->
+    <script>
+        $('#flagModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var userId = button.data('user-id');
+            var campaignId = button.data('campaign-id');
+            var type = button.data('type');
+            var modal = $(this);
+            
+            if (type === 'user') {
+                modal.find('#flagged_user_id').val(userId);
+                modal.find('#flagged_campaign_id').val(''); // Clear campaign ID if flagging a user
+            } else if (type === 'campaign') {
+                modal.find('#flagged_user_id').val(''); // Clear user ID if flagging a campaign
+                modal.find('#flagged_campaign_id').val(campaignId);
+            }
+        });
+
+        // Populate the Remove Modal
+        
+        $('#removeModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget); // Button that triggered the modal
+            var userId = button.data('user-id'); // Extract info from data-* attributes
+            var campaignId = button.data('campaign-id');
+                
+            var modal = $(this);
+            if(userId) {
+                modal.find('#remove_user_id').val(userId);
+            }
+            if(campaignId) {
+                modal.find('#remove_campaign_id').val(campaignId);
+            }
+        });
+
+        $(document).ready(function () {
+            $('.flash').each(function () {
+                $(this).fadeIn(500).delay(3000).fadeOut(500);
+            });
+        });
+    </script>
+    <script>
+        $('#requestModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget); // Button that triggered the modal
+            var campaignId = button.data('campaign-id'); // Extract info from data-* attributes
+            var modal = $(this);
+            modal.find('#campaign_id').val(campaignId);
+        });
+        $(document).ready(function () {
+            $('.flash').each(function () {
+                $(this).fadeIn(500).delay(3000).fadeOut(500);
+            });
+        });
+        
+    </script>
+</body>
+</html>

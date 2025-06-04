@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Ad Request</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lobster:wght@400&display=swap">
+    <!-- Custom CSS -->
+    <style>
+        body {
+            font-family: 'Lobster', cursive;
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .flash {
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 1rem;
+            text-align: center;
+            display: none; /* Hide by default, show with JavaScript */
+        }
+
+        .flash.danger {
+            background-color: #dc3545;
+        }
+
+        .flash.success {
+            background-color: #28a745;
+        }
+
+        .flash.info {
+            background-color: #17a2b8;
+        }
+
+        .flash.warning {
+            background-color: #ffc107;
+        }
+        .navbar {
+            margin-bottom: 30px;
+            background-color: #e3f2fd;
+            border-bottom: 1px solid #ddd;
+        }
+        .navbar-brand {
+            font-size: 1.8rem;
+            color: #ff0095;
+        }
+        .nav-link {
+            color: #4d10f3;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #3c08d1;
+        }
+        .dashboard-section {
+            width: 100%;
+            max-width: 600px;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            text-align: center;
+            margin: auto;
+        }
+        .btn-primary {
+            background-color: #ff0095;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+        .flash.error {
+            background-color: #dc3545; /* Red color for error messages */
+        }
+        
+        .btn-primary:hover {
+            background-color: #e60084;
+        }
+        .btn-warning {
+            background-color: #ffc107;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+        .btn-success {
+            background-color: #28a745;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        .form-control {
+            border-radius: 5px;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
+            border: 1px solid #ced4da;
+            padding: 10px;
+        }
+        .form-control:focus {
+            border-color: #ff0095;
+            box-shadow: 0 0 0 0.2rem rgba(255, 0, 149, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+            {% if user.role == 'influencer' %}
+                <a class="navbar-brand" href="{{ url_for('influencer_dashboard') }}">Influencer Dashboard</a>
+            {% else %}
+                <a class="navbar-brand" href="{{ url_for('sponsor_dashboard') }}">Sponsor Dashboard</a>
+            {% endif %}
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('profile') }}">Profile</a>
+                    </li>
+                    {% if user.role == 'sponsor' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('campaigns') }}">Campaigns</a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('find_campaigns') }}">Find</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('stats') }}">Stats</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container dashboard-section">
+        <h1>Create Ad Request for "{{ campaign.title }}"</h1>
+        <p><strong>Description:</strong> {{ campaign.description }}</p>
+        <p><strong>Payment:</strong> ${{ campaign.payment }}</p>
+        <p><strong>Influencer Assigned:</strong> <span id="assigned-influencer">None</span></p>
+
+        <form method="POST">
+            <div class="form-group">
+                <label for="influencer">Available Influencers:</label>
+                <select class="form-control" id="influencer" name="influencer" required>
+                    {% for influencer in influencers %}
+                        <option value="{{ influencer.id }}">{{ influencer.username }}</option>
+                    {% endfor %}
+                </select>
+                <button type="button" class="btn btn-warning mt-2" onclick="viewProfile()">View Profile</button>
+            </div>
+            <div class="form-group">
+                <label for="message" class="form-label">Message for Request:</label>
+                <input type="text" id="message" name="message" class="form-control" required />
+            </div>
+            <button type="submit" class="btn btn-success">Add</button>
+            <a href="{{ url_for('view_campaign', campaign_id=campaign.id) }}" class="btn btn-danger">Cancel</a>
+        </form>
+        
+    </div>
+    {% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+        <div class="flashes">
+    {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+    {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <!-- JS Libraries -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function viewProfile() {
+            var influencerId = document.getElementById("influencer").value;
+            if (!isNaN(influencerId) && influencerId.trim() !== "") {
+                var baseUrl = "{{ url_for('view_profile', user_id=0) }}".slice(0, -1);
+                var url = baseUrl + influencerId;
+                window.location.href = url;
+            } else {
+                alert("Please select a valid influencer.");
+            }
+        }
+        $(document).ready(function() {
+            $('.flash').each(function() {
+                $(this).slideDown('slow').delay(3000).slideUp('slow');
+            });
+        });
+    </script>
+</body>
+</html>

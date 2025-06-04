@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sponsor Registration</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lobster:wght@400&display=swap">
+    <style>
+        body {
+            font-family: 'Lobster', cursive;
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .flash.error {
+            background-color: #dc3545; /* Red color for error messages */
+        }
+        
+        .navbar {
+            margin-bottom: 30px;
+            background-color: #e3f2fd;
+            border-bottom: 1px solid #ddd;
+        }
+        .navbar-brand {
+            font-size: 1.8rem;
+            color: #ff0095;
+        }
+        .nav-link {
+            color: #4d10f3;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #3c08d1;
+        }
+        .navbar-nav .nav-item.active .nav-link {
+            color: #d81b60;
+        }
+        .registration-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .registration-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .registration-container h2 {
+            color: #ff0095;
+            font-weight: 500;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .form-control {
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+        }
+        .form-control:focus {
+            border-color: #ff0095;
+            box-shadow: 0 0 0 0.2rem rgba(255, 0, 149, 0.25);
+        }
+        .form-label {
+            font-weight: 500;
+            color: #343a40;
+        }
+
+        .flash {
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 1rem;
+            text-align: center;
+            display: none; /* Hide by default, show with JavaScript */
+        }
+
+        .flash.danger {
+            background-color: #dc3545;
+        }
+
+        .flash.success {
+            background-color: #28a745;
+        }
+
+        .flash.info {
+            background-color: #17a2b8;
+        }
+
+        .flash.warning {
+            background-color: #ffc107;
+        }
+        .btn-custom {
+            background-color: #ff0095;
+            color: white;
+            border: none;
+            width: 100%;
+            border-radius: 5px;
+        }
+        .btn-custom:hover {
+            background-color: #e60084;
+        }
+    </style>
+</head>
+<body>
+    <div class="registration-page">
+        <div class="registration-container">
+            <h2>Sponsor Registration</h2>
+            <form method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="username" class="form-label">Sponsor/Company Name:</label>
+                    <input type="text" id="username" name="username" class="form-control" required/>
+                </div>
+                <div class="form-group">
+                    <label for="password" class="form-label">Password:</label>
+                    <input type="password" id="password" name="password" class="form-control" required/>
+                </div>
+                <div class="form-group">
+                    <label for="email" class="form-label">Email:</label>
+                    <input type="email" id="email" name="email" class="form-control" required/>
+                </div>
+                <div class="form-group">
+                    <label for="target" class="form-label">Target Audience:</label>
+                    <input type="number" id="target" name="target" class="form-control" required/>
+                </div>
+                <div class="form-group">
+                    <label for="mobile" class="form-label">Mobile Number:</label>
+                    <input type="tel" id="mobile" name="mobile" pattern="[0-9]{10}" placeholder="1234567890" required/>
+                </div>
+                <div class="form-group">
+                    <label for="category" class="form-label">Niche/Category:</label>
+                    <select id="category" name="category" class="form-control" required>
+                        <option value="Beauty and Fashion">Beauty and Fashion</option>
+                        <option value="Gaming">Gaming</option>
+                        <option value="Lifestyle">Lifestyle</option>
+                        <option value="Tech">Tech</option>
+                        <option value="Education">Educational</option>
+                        <option value="Food">Food</option>
+                        <option value="Travel">Travel</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="platform" class="form-label">Platform Presence:</label>
+                    <select id="platform" name="platform" class="form-control" required>
+                        <option value="Youtube">YouTube</option>
+                        <option value="Instagram">Instagram</option>
+                        <option value="Twitter">Twitter</option>
+                        <option value="Facebook">Facebook</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="profile_pic" class="form-label">Profile Picture:</label>
+                    <input type="file" id="profile_pic" name="profile_pic" class="form-control"/>
+                </div>
+                <input type="hidden" name="role" value="sponsor"/>
+                <button type="submit" class="btn btn-custom mt-3">Register</button>
+            </form>
+        </div>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+    <div class="flashes">
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <script>
+        $(document).ready(function() {
+            $('.flash').each(function() {
+                $(this).slideDown('slow').delay(3000).slideUp('slow');
+            });
+        });
+    </script>
+</body>
+</html>

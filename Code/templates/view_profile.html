@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ user.username }}'s Profile</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lobster:wght@400&display=swap">
+    <!-- Custom CSS -->
+    <style>
+        body {
+            font-family: 'Lobster', cursive;
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .navbar {
+            margin-bottom: 30px;
+            background-color: #e3f2fd;
+            border-bottom: 1px solid #ddd;
+        }
+        .navbar-brand {
+            font-size: 1.8rem;
+            color: #ff0095;
+        }
+        .flash.error {
+            background-color: #dc3545; /* Red color for error messages */
+        }
+        
+        .flash {
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 1rem;
+            text-align: center;
+            display: none; /* Hide by default, show with JavaScript */
+        }
+
+        .flash.danger {
+            background-color: #dc3545;
+        }
+
+        .flash.success {
+            background-color: #28a745;
+        }
+
+        .flash.info {
+            background-color: #17a2b8;
+        }
+
+        .flash.warning {
+            background-color: #ffc107;
+        }
+        .nav-link {
+            color: #4d10f3;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #3c08d1;
+        }
+        .profile-header {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .profile-pic {
+            width: 150px; /* Adjust the size as needed */
+            height: 150px; /* Ensure the image holder is square */
+            object-fit: cover; /* Ensures the image covers the area without distortion */
+            border-radius: 50%; /* Optional: For a circular image holder */
+            border: 2px solid #ddd; /* Optional: Add a border if needed */
+            background-color: #f0f0f0; /* Background color for placeholder */
+        }
+        
+        .dashboard-section {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .btn-primary {
+            background-color: #ff0095;
+            color: white;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #e60084;
+        }
+    </style>
+</head>
+<body>
+    <div class="container dashboard-section">
+        <div class="profile-header">
+            <h1>{{ user.username }}'s Profile</h1>
+            {% if user.role == 'influencer' or user.role == 'sponsor' %}
+                {% if user.profile_pic %}
+                    <img src="{{ url_for('static', filename='uploads/profile_pics/' + user.profile_pic) }}" alt="Profile Picture" class="profile-pic img-fluid"/>
+                {% else %}
+                    <img src="https://via.placeholder.com/150" alt="Profile Picture" class="profile-pic">
+                {% endif %}
+            {% endif %}
+
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>Category:</strong> {{ user.category }}</p>
+            <p><strong>Platform:</strong> {{ user.platform }}</p>
+            <p><strong>Mobile:</strong> {{ user.mobile }}</p>
+            <p><strong>Languages Known:</strong> {{ user.languages }}</p>
+            <p><strong>Content Style:</strong> {{ user.content_style }}</p>
+        </div>
+
+        <div class="dashboard-section">
+            {% if user.role=='influencer' %}
+                <h2>Campaigns Associated</h2>
+            {% else %}
+                <h2>Campaigns Created</h2>
+            {% endif %}
+            {% if campaigns %}
+                <ul class="list-group">
+                    {% for campaign in campaigns %}
+                        <li class="list-group-item">
+                            <h5>{{ campaign.title }}</h5>
+                            <p>{{ campaign.description }}</p>
+                            <p><strong>Niche:</strong> {{ campaign.niche }}</p>
+                            <p><strong>Date:</strong> {{ campaign.start_date.strftime('%Y-%m-%d') }}</p>
+                            <p><strong>Status:</strong> {{ campaign.status }}</p>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+            {% if user.role=='influencer' %}
+                <p>No campaigns associated with this influencer.</p>
+            {% else %}
+                <p>No campaigns associated with this sponsor.</p>
+            {% endif %}
+
+            {% endif %}
+        </div>
+        <a href="{{ url_for('find_campaigns') }}" class="btn btn-primary mt-3">Back to Find Page</a>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+    <div class="flashes">
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <!-- JS Libraries -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.flash').each(function() {
+                $(this).slideDown('slow').delay(3000).slideUp('slow');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sponsor Dashboard</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lobster:wght@400&display=swap">
+    <!-- Custom CSS -->
+    <style>
+        body {
+            font-family: 'Lobster', cursive;
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .flash {
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 1rem;
+            text-align: center;
+            display: none; /* Hide by default, show with JavaScript */
+        }
+
+        .flash.danger {
+            background-color: #dc3545;
+        }
+
+        .flash.success {
+            background-color: #28a745;
+        }
+
+        .flash.info {
+            background-color: #17a2b8;
+        }
+        .flash.error {
+            background-color: #dc3545; /* Red color for error messages */
+        }
+        
+        .flash.warning {
+            background-color: #ffc107;
+        }
+        .navbar {
+            margin-bottom: 30px;
+            background-color: #e3f2fd;
+            border-bottom: 1px solid #ddd;
+        }
+        .navbar-brand {
+            font-size: 1.8rem;
+            color: #ff0095;
+        }
+        .nav-link {
+            color: #4d10f3;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #3c08d1;
+        }
+        .dashboard-section {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .card {
+            margin-bottom: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+        }
+        .card-body {
+            padding: 15px;
+        }
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: #ff0095;
+        }
+        .btn-custom, .btn-info, .btn-success {
+            border-radius: 4px;
+        }
+        .btn-custom {
+            background-color: #ff0095;
+            color: white;
+            border: none;
+        }
+        .btn-custom:hover {
+            background-color: #e60084;
+        }
+        .btn-info {
+            background-color: #17a2b8;
+            color: white;
+            border: none;
+        }
+        .btn-info:hover {
+            background-color: #117a8b;
+        }
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+            border: none;
+        }
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        .form-control {
+            border-radius: 5px;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
+            border: 1px solid #ced4da;
+            padding: 10px;
+        }
+        .form-control:focus {
+            border-color: #ff0095;
+            box-shadow: 0 0 0 0.2rem rgba(255, 0, 149, 0.25);
+        }
+        .add-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            border-radius: 50%;
+            background-color: #ff0095;
+            color: white;
+            width: 60px;
+            height: 60px;
+            text-align: center;
+            line-height: 60px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Sponsor Dashboard</a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('profile') }}" id="profile-link">Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('campaigns') }}" id="campaigns-link">Campaigns</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('find_campaigns') }}" id="find-link">Find</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('stats') }}" id="stats-link">Stats</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('logout') }}" id="logout-link">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Profile Section -->
+        <div id="profile-section" class="dashboard-section">
+            <h2>Welcome to SPONSOR DASHBOARD</h2>
+            <p>Have a nice day!</p>
+            <h4>Explore everything here...</h4>
+        </div>
+        <!-- Messages Section -->
+    <div id="messages-section" class="dashboard-section">
+        <h3>Flag Messages</h3>
+        {% if flag_messages %}
+            <ul class="list-group">
+                {% for message in flag_messages %}
+                    <li class="list-group-item">
+                        <strong>Flagged by: </strong>{{ message.flagged_by.username }}<br>
+                        <strong>Reason: </strong>{{ message.reason }}<br>
+                        <strong>Date: </strong>{{ message.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No flag messages available.</p>
+        {% endif %}
+    </div>
+        <!-- Other Sections can be added here -->
+
+    </div>
+    {% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+    <div class="flashes">
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <!-- JS Libraries -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Navigation link click events
+            $('#profile-link').click(function() {
+                showSection('profile-section');
+            });
+            $('#find-link').click(function() {
+                showSection('find-section');
+            });
+            $('#stats-link').click(function() {
+                showSection('stats-section');
+            });
+            $('#logout-link').click(function() {
+                window.location.href = "{{ url_for('logout') }}";
+            });
+            $(document).ready(function() {
+                $('.flash').each(function() {
+                    $(this).slideDown('slow').delay(3000).slideUp('slow');
+                });
+            });
+        
+            // Show section based on navigation link click
+            function showSection(sectionId) {
+                // Hide all sections except for the messages section
+                $('.dashboard-section').not('#messages-section').hide();
+                $('#' + sectionId).show();
+            }
+        
+            // Initial display
+            $('#profile-section').show();
+            $('#messages-section').show();  // Always show the messages section
+        });
+        
+    </script>
+</body>
+</html>

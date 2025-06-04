@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stats</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lobster:wght@400&display=swap">
+    <!-- Custom CSS -->
+    <style>
+        body {
+            font-family: 'Lobster', cursive;
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .flash {
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 1rem;
+            text-align: center;
+            display: none; /* Hide by default, show with JavaScript */
+        }
+        .flash.danger {
+            background-color: #dc3545;
+        }
+        .flash.success {
+            background-color: #28a745;
+        }
+        .flash.info {
+            background-color: #17a2b8;
+        }
+        .flash.warning {
+            background-color: #ffc107;
+        }
+        .flash.error {
+            background-color: #dc3545; /* Red color for error messages */
+        }
+        
+        .navbar {
+            margin-bottom: 30px;
+            background-color: #e3f2fd;
+            border-bottom: 1px solid #ddd;
+        }
+        .navbar-brand {
+            font-size: 1.8rem;
+            color: #ff0095;
+        }
+        .nav-link {
+            color: #4d10f3;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #3c08d1;
+        }
+        .dashboard-section, .card {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 500;
+            color: #ff0095;
+        }
+        .btn-custom {
+            background-color: #ff0095;
+            color: white;
+            border-radius: 4px;
+            border: none;
+        }
+        .btn-custom:hover {
+            background-color: #e60084;
+        }
+        .chart-container {
+            width: 45%; /* Adjusted width for smaller size */
+            height: 300px; /* Adjusted height for smaller size */
+            margin: 0 2.5%; /* Space between the two charts */
+            float: left; /* Align charts side by side */
+        }
+        .chart-container.right {
+            float: right;
+        }
+        canvas {
+            width: 100% !important; /* Ensure canvas fits within the container */
+            height: 100% !important; /* Ensure canvas fits within the container */
+        }
+        .charts-section {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .charts-section h2 {
+            font-size: 1.5rem;
+            color: #ff0095;
+            margin-bottom: 20px;
+        }
+        .charts-section h3 {
+            font-size: 1.25rem;
+            color: #333;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        {% if user.role == 'influencer' %}
+            <a class="navbar-brand" href="{{ url_for('influencer_dashboard') }}">Influencer Dashboard</a>
+        {% endif %}
+        {% if user.role == 'sponsor' %}
+            <a class="navbar-brand" href="{{ url_for('sponsor_dashboard') }}">Sponsor Dashboard</a>
+        {% endif %}
+        {% if user.role == 'admin' %}
+            <a class="navbar-brand" href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
+        {% endif %}
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                {% if user.role == 'sponsor' or user.role=='influencer' %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('profile') }}">Profile</a>
+                </li>
+                {% endif %}
+                {% if user.role == 'sponsor' %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('campaigns') }}">Campaigns</a>
+                </li>
+                {% endif %}
+                {% if user.role == 'admin' %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{url_for('admin_dashboard_info')}}">Info</a>
+                </li>
+                {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('find_campaigns') }}">Find</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('stats') }}">Stats</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container dashboard-section">
+        <h1 class="mb-4">Statistics</h1>
+        <div class="card">
+            <div class="card-body">
+                <p>Total Campaigns: {{ stats.total_campaigns }}</p>
+                <p>Total Influencers: {{ stats.total_influencers }}</p>
+                <p>Total Sponsors: {{ stats.total_sponsors }}</p>
+                <p>Total Earnings: ${{ stats.total_earnings }}</p>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-section">
+            <h2>CHARTS</h2>
+            <div class="chart-container left">
+                <h3>Platform Distribution</h3>
+                <canvas id="platformChart"></canvas>
+            </div>
+            <div class="chart-container right">
+                <h3>Category Distribution</h3>
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+    <div class="flashes">
+        {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var ctx1 = document.getElementById('platformChart').getContext('2d');
+            var platformLabels = JSON.parse('{{ labels|safe }}');
+            var platformData = JSON.parse('{{ values|safe }}');
+
+            new Chart(ctx1, {
+                type: 'polarArea',
+                data: {
+                    labels: platformLabels,
+                    datasets: [{
+                        label: '# of Users',
+                        data: platformData,
+                        backgroundColor: [
+                            '#FF5733',  /* Bright red-orange */
+                            '#33FF57',  /* Bright green */
+                            '#3357FF',  /* Bright blue */
+                            '#F1C40F',  /* Bright yellow */
+                            '#FF33A1',  /* Bright pink */
+                            '#8E44AD'   /* Bright purple */
+                        ],
+                        borderColor: [
+                            '#FF5733',
+                            '#33FF57',
+                            '#3357FF',
+                            '#F1C40F',
+                            '#FF33A1',
+                            '#8E44AD'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: '#333',
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#ffffff',
+                            titleColor: '#333',
+                            bodyColor: '#333',
+                            borderColor: '#ddd',
+                            borderWidth: 1
+                        }
+                    }
+                }
+            });
+
+            var ctx2 = document.getElementById('categoryChart').getContext('2d');
+            var categoryLabels = JSON.parse('{{ labels_cat|safe }}');
+            var categoryData = JSON.parse('{{ values_cat|safe }}');
+
+            new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: categoryLabels,
+                    datasets: [{
+                        label: '# of Users',
+                        data: categoryData,
+                        backgroundColor: [
+                            '#F39C12',  /* Bright orange */
+                            '#E74C3C',  /* Bright red */
+                            '#3498DB',  /* Bright blue */
+                            '#2ECC71',  /* Bright green */
+                            '#9B59B6',  /* Bright purple */
+                            '#1ABC9C'   /* Bright teal */
+                        ],
+                        borderColor: [
+                            '#F39C12',
+                            '#E74C3C',
+                            '#3498DB',
+                            '#2ECC71',
+                            '#9B59B6',
+                            '#1ABC9C'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: '#333',
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#ffffff',
+                            titleColor: '#333',
+                            bodyColor: '#555',
+                            borderColor: '#ddd',
+                            borderWidth: 1
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
+    <!-- JS Libraries -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

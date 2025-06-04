@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campaign Management</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lobster:wght@400&display=swap">
+    <!-- Custom CSS -->
+    <style>
+        body {
+            font-family: 'Lobster', cursive;
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            color: #343a40;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .flash.error {
+            background-color: #dc3545; /* Red color for error messages */
+        }
+        
+        .navbar {
+            background-color: #e3f2fd;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        .navbar-brand {
+            font-size: 1.8rem;
+            color: #ff0095;
+        }
+        .nav-link {
+            color: #4d10f3 !important;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #3c08d1 !important;
+        }
+
+        .flash {
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 1rem;
+            text-align: center;
+            display: none; /* Hide by default, show with JavaScript */
+        }
+
+        .flash.danger {
+            background-color: #dc3545;
+        }
+
+        .flash.success {
+            background-color: #28a745;
+        }
+
+        .flash.info {
+            background-color: #17a2b8;
+        }
+
+        .flash.warning {
+            background-color: #ffc107;
+        }
+        .dashboard-section, .table-container {
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .btn-primary {
+            background-color: #ff0095;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #e60084;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .add-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            border-radius: 50%;
+            background-color: #ff0095;
+            color: white;
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            line-height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .modal-content {
+            border-radius: 10px;
+        }
+        .modal-header h5 {
+            color: #ff0095;
+        }
+        .form-control {
+            border-radius: 5px;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
+            border: 1px solid #ced4da;
+            padding: 10px;
+        }
+        .form-control:focus {
+            border-color: #ff0095;
+            box-shadow: 0 0 0 0.2rem rgba(255, 0, 149, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        {% if user.role=='influencer' %}
+            <a class="navbar-brand" href="{{ url_for('influencer_dashboard') }}">Influencer Dashboard</a>
+        {% else %}
+            <a class="navbar-brand" href="{{ url_for('sponsor_dashboard') }}">Sponsor Dashboard</a>
+        {% endif %}
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('profile') }}">Profile</a>
+                </li>
+                {% if user.role=='sponsor' %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('campaigns') }}">Campaigns</a>
+                </li>
+                {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('find_campaigns') }}">Find</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('stats') }}">Stats</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container mt-5">
+        <h1 class="mb-4">Campaign Management</h1>
+        <div class="dashboard-section mb-4">
+            <input type="text" class="form-control" placeholder="Search" id="search-campaigns">
+            <button class="btn btn-secondary mt-2" id="filter-campaigns">Filter</button>
+        </div>
+        <div class="table-container">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Title</th>                       
+                        <th>Niche</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="campaigns-table">
+                    {% for campaign in active_campaigns %}
+                    <tr>
+                        <td>{{ campaign.title }}</td>
+                        <td>{{ campaign.niche }}</td>
+                        <td>{{ campaign.start_date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{campaign.end_date.strftime('%Y-%m-%d')}}</td>
+                        <td>
+                            <a href="{{ url_for('view_campaign', campaign_id=campaign.id) }}" class="btn btn-info btn-sm">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="add-button" id="add-campaign-button">+</div>
+    </div>
+
+    <!-- Add Campaign Modal -->
+    <div class="modal fade" id="addCampaignModal" tabindex="-1" role="dialog" aria-labelledby="addCampaignModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addCampaignModalLabel">Add Campaign</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" enctype="multipart/form-data" id="add-campaign-form">
+                        {{ form.hidden_tag() }}
+                        <div class="form-group">
+                            {{ form.title.label }}<br>
+                            {{ form.title(class_='form-control') }}
+                        </div>
+                        <div class="form-group">
+                            {{ form.description.label }}<br>
+                            {{ form.description(class_='form-control') }}
+                        </div>
+                        <div class="form-group">
+                            {{ form.image.label }}<br>
+                            {{ form.image(class_='form-control') }}
+                        </div>
+                        <div class="form-group">
+                            {{ form.niche.label(class_='form-label') }}
+                            {{ form.niche() }}
+                        </div>
+                        <div class="form-group">
+                            {{ form.start_date.label }}<br>
+                            {{ form.start_date(class_='form-control') }}
+                        </div>
+                        <div class="form-group">
+                            {{ form.end_date.label }}<br>
+                            {{ form.end_date(class_='form-control') }}
+                        </div>
+                        <div class="form-group">
+                            {{ form.budget.label }}<br>
+                            {{ form.budget(class_='form-control') }}
+                        </div>
+                        <div class="form-group">
+                            {{form.payment.label}}<br>
+                            {{form.payment(class_='form-control')}}
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            Add Campaign 
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Campaign Modal -->
+    <div class="modal fade" id="viewCampaignModal" tabindex="-1" role="dialog" aria-labelledby="viewCampaignModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewCampaignModalLabel">View Campaign</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="viewCampaignContent">
+                    <!-- Content from view_campaign.html will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="createAdRequestBtn">Create Ad Request</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+    <div class="flashes">
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <!-- JS Libraries -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Show Add Campaign Modal
+            $('#add-campaign-button').click(function() {
+                $('#addCampaignModal').modal('show');
+            });
+        });
+        $(document).ready(function() {
+            $('.flash').each(function() {
+                $(this).slideDown('slow').delay(3000).slideUp('slow');
+            });
+        });
+    </script>
+</body>
+</html>

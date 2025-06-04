@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lobster:wght@400&display=swap">
+    <style>
+        body {
+            font-family: 'Lobster', cursive;
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background-color: #e3f2fd;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid #ddd;
+        }
+
+        .navbar-brand {
+            font-family: 'Lobster', cursive;
+            font-size: 1.8rem;
+            color: #ff0095;
+        }
+
+        .nav-link {
+            font-weight: bold;
+            color: #4d10f3;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #3c08d1;
+        }
+
+        .dashboard-section {
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            margin-top: 20px;
+            width: 80%;
+        }
+
+        .btn-primary, .btn-danger {
+            border: none;
+            transition: background-color 0.3s ease;
+            color: #fff;
+        }
+
+        .btn-primary {
+            background-color: #ffc107;
+        }
+
+        .btn-primary:hover {
+            background-color: #e6ac00;
+        }
+
+        .btn-danger {
+            background-color: #f55a5a;
+        }
+
+        .btn-danger:hover {
+            background-color: #d9534f;
+        }
+
+        .campaign {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .campaign span {
+            flex-grow: 1;
+        }
+
+        .campaign-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h2 {
+            color: #ff0095;
+        }
+        .flash.danger {
+            background-color: #dc3545; /* Red color for danger messages */
+        }
+        
+        .flash.success {
+            background-color: #28a745; /* Green color for success messages */
+        }
+        
+        .flash.info {
+            background-color: #17a2b8; /* Blue color for info messages */
+        }
+        
+        .flash.warning {
+            background-color: #ffc107; /* Yellow color for warning messages */
+        }
+        
+        .flash.error {
+            background-color: #dc3545; /* Red color for error messages */
+        }
+        
+        .flash {
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 1rem;
+            text-align: center;
+            display: none; /* Hide by default, show with JavaScript */
+        }
+        .campaign-buttons {
+            display: inline-block; /* Ensure buttons are inline */
+            margin-right: 5px; /* Space between buttons, if needed */
+        }
+        .flash.danger {
+            background-color: #dc3545;
+        }
+
+        .flash.success {
+            background-color: #28a745;
+        }
+
+        .flash.info {
+            background-color: #17a2b8;
+        }
+
+        .flash.warning {
+            background-color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <a class="navbar-brand" href="#">Admin Dashboard</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{ url_for('admin_dashboard') }}">Info</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('find_campaigns') }}">Find</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{url_for('stats')}}">Stats</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{url_for('logout')}}">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Welcome Admin</h1>
+
+        <!-- Ongoing Campaigns Section -->
+        <div class="dashboard-section">
+            <h2>Ongoing Campaigns:</h2>
+            {% for campaign in ongoing_campaigns %}
+                <li>
+                    {{ campaign.title }} | Days left:
+                    {% set days_left = (campaign.end_date - now.date()).days %}
+                    {% if days_left > 0 %}
+                        <span class="badge badge-success">{{ days_left }} days to go</span>
+                    {% elif days_left == 0 %}
+                        <span class="badge badge-warning">Today</span>
+                    {% else %}
+                        <span class="badge badge-secondary">Completed</span>
+                    {% endif %}
+                    <div class="campaign-buttons">
+                        <a href="{{ url_for('view_campaign', campaign_id=campaign.id) }}" class="btn btn-primary">View</a>
+                    </div>
+                </li>
+                {% endfor %}
+        </div>
+
+        <!-- Flagged Users/Campaigns Section -->
+        <div class="dashboard-section">
+            <h2>Flagged Users/Campaigns</h2>
+            {% for flag in flagged_items %}
+                <div class="campaign">
+                    <span>{{ flag.flagged_campaign.title if flag.flagged_campaign else flag.flagged_user.username }}</span>
+                    <div class="campaign-buttons">
+                        <a class="btn btn-primary" href="{{ url_for('view_campaign', campaign_id=flag.flagged_campaign.id) if flag.flagged_campaign else url_for('view_profile', user_id=flag.flagged_user.id) }}" 
+                        {% if not flag.flagged_campaign %}href="{{ url_for('view_profile', user_id=flag.flagged_user.id) }}"{% endif %}>
+                         View
+                     </a>
+                                             <a class="btn btn-danger" href="{{ url_for('remove_flag', flag_id=flag.id) }}">Remove</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.flash').each(function() {
+                $(this).slideDown('slow').delay(3000).slideUp('slow');
+            });
+        });
+    </script>
+</body>
+</html>

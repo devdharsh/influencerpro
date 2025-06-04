@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lobster:wght@400&display=swap">
+    <style>
+        body {
+            font-family: 'Lobster', cursive;
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background-color: #e3f2fd;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid #ddd;
+        }
+
+        .navbar-brand {
+            font-family: 'Lobster', cursive;
+            font-size: 1.8rem;
+            color: #ff0095;
+        }
+
+        .nav-link {
+            font-weight: bold;
+            color: #4d10f3;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #3c08d1;
+        }
+
+        .navbar-nav .nav-item.active .nav-link {
+            color: #d81b60;
+        }
+
+        .dashboard-section {
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            margin-top: 20px;
+            width: 80%;
+        }
+
+        .btn-primary, .btn-danger {
+            border: none;
+            transition: background-color 0.3s ease;
+            color: #fff;
+        }
+
+        .btn-primary {
+            background-color: #ffc107;
+        }
+
+        .btn-primary:hover {
+            background-color: #e6ac00;
+        }
+
+        .btn-danger {
+            background-color: #f55a5a;
+        }
+
+        .btn-danger:hover {
+            background-color: #d9534f;
+        }
+
+        .campaign {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .campaign span {
+            flex-grow: 1;
+        }
+
+        .campaign-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        #search-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        #search-input {
+            width: 100%;
+        }
+        .flash.danger {
+            background-color: #dc3545; /* Red color for danger messages */
+        }
+        
+        .flash.success {
+            background-color: #28a745; /* Green color for success messages */
+        }
+        
+        .flash.info {
+            background-color: #17a2b8; /* Blue color for info messages */
+        }
+        
+        .flash.warning {
+            background-color: #ffc107; /* Yellow color for warning messages */
+        }
+        
+        .flash.error {
+            background-color: #dc3545; /* Red color for error messages */
+        }
+        
+        h2 {
+            color: #ff0095;
+        }
+
+        .flash {
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 1rem;
+            text-align: center;
+            display: none; /* Hide by default, show with JavaScript */
+        }
+
+        .flash.danger {
+            background-color: #dc3545;
+        }
+
+        .flash.success {
+            background-color: #28a745;
+        }
+
+        .flash.info {
+            background-color: #17a2b8;
+        }
+
+        .flash.warning {
+            background-color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <a class="navbar-brand" href="#">Admin Dashboard</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{url_for('admin_dashboard_info')}}" id="info-link">Info</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{url_for('find_campaigns')}}" id="find-link">Find</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{url_for('stats')}}" id="stats-link">Stats</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('logout') }}" id="logout-link">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+        <!-- Profile Section -->
+        <div id="profile-section" class="dashboard-section">
+            <h2>Welcome to ADMIN DASHBOARD</h2>
+            <p>Have a nice day!</p>
+            <h4>Explore everything here...</h4>
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+    <div class="flashes">
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Navigation link click events
+            $('#info-link').click(function() {
+                window.location.href = "{{ url_for('admin_dashboard_info') }}";
+            });
+            $('#find-link').click(function() {
+                window.location.href = "{{ url_for('find_campaigns') }}";
+            });
+            $('#stats-link').click(function() {
+                window.location.href = "{{ url_for('stats') }}";
+            });
+
+            // Show section based on navigation link click
+            function showSection(sectionId) {
+                $('.dashboard-section').hide();
+                $('#' + sectionId).show();
+            }
+        });
+        $(document).ready(function() {
+            $('.flash').each(function() {
+                $(this).slideDown('slow').delay(3000).slideUp('slow');
+            });
+        });
+    </script>
+</body>
+</html>

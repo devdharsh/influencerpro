@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lobster:wght@400&display=swap">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Lobster', cursive;
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .profile-pic {
+            width: 150px; /* Adjust the size as needed */
+            height: 150px; /* Ensure the image holder is square */
+            object-fit: cover; /* Ensures the image covers the area without distortion */
+            border-radius: 50%; /* Optional: For a circular image holder */
+            border: 2px solid #ddd; /* Optional: Add a border if needed */
+            background-color: #f0f0f0; /* Background color for placeholder */
+        }
+        .navbar {
+            margin-bottom: 30px;
+            background-color: #e3f2fd;
+            border-bottom: 1px solid #ddd;
+        }
+        .navbar-brand {
+            font-size: 1.8rem;
+            color: #ff0095;
+        }
+        .nav-link {
+            color: #4d10f3;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #3c08d1;
+        }
+        .dashboard-section {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            color: #ff0095;
+        }
+
+        .flash {
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 1rem;
+            text-align: center;
+            display: none; /* Hide by default, show with JavaScript */
+        }
+        .flash.error {
+            background-color: #dc3545; /* Red color for error messages */
+        }
+        
+        .flash.danger {
+            background-color: #dc3545;
+        }
+
+        .flash.success {
+            background-color: #28a745;
+        }
+
+        .flash.info {
+            background-color: #17a2b8;
+        }
+
+        .flash.warning {
+            background-color: #ffc107;
+        }
+        .profile-info p {
+            margin-bottom: 10px;
+        }
+        .profile-pic {
+            width: 150px; /* Adjust the size as needed */
+            height: 150px; /* Same as width for a perfect circle */
+            border-radius: 50%; /* This creates the circular shape */
+            overflow: hidden; /* Ensures the image doesn't overflow the circle */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0; /* Optional: Background color in case of no image */
+        }
+        
+        .profile-pic img {
+            width: 100%;
+            height: auto; /* Maintain aspect ratio */
+            display: block; /* Remove any space below the image */
+        }
+        
+        .active-campaigns ul, .new-requests ul {
+            list-style: none;
+            padding: 0;
+        }
+        .active-campaigns li, .new-requests li {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .request-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px; /* Space between list items */
+        }
+        
+        .request-title {
+            margin-right: 20px; /* Space between title and buttons */
+            flex: 1; /* Allows the title to take up available space */
+        }
+        
+        .inline-form {
+            margin-left: 10px; /* Space between buttons */
+            display: inline; /* Keep forms on the same line */
+        }
+        
+        .inline-form button {
+            margin-left: 5px; /* Space between button and form */
+        }
+        .btn {
+            margin-left: 10px; /* Space between button and details */
+        }
+        
+        .view-btn, .accept-btn, .reject-btn {
+            margin-left: 10px;
+        }
+        .view-btn {
+            color: #4d10f3;
+        }
+        .accept-btn {
+            color: #28a745;
+        }
+        .reject-btn {
+            color: #dc3545;
+        }
+        .view-btn:hover, .accept-btn:hover, .reject-btn:hover {
+            text-decoration: underline;
+        }
+        .badge-success {
+            background-color: #28a745;
+        }
+        .badge-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .badge-secondary {
+            background-color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light">
+        {% if user.role == 'influencer' %}
+            <a class="navbar-brand" href="{{ url_for('influencer_dashboard') }}">Influencer Dashboard</a>
+        {% else %}
+            <a class="navbar-brand" href="{{ url_for('sponsor_dashboard') }}">Sponsor Dashboard</a>
+        {% endif %}
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('profile') }}">Profile</a>
+                </li>
+                {% if user.role == 'sponsor' %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('campaigns') }}">Campaigns</a>
+                </li>
+                {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('find_campaigns') }}">Find</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('stats') }}">Stats</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container dashboard-section">
+        <h1 class="mb-4">Profile</h1>
+        <div class="profile-section">
+            <div class="profile-pic">
+                {% if user.role == 'influencer' or user.role == 'sponsor' %}
+                    {% if user.profile_pic %}
+                        <img src="{{ url_for('static', filename='uploads/profile_pics/' + user.profile_pic) }}" alt="Profile Picture" class="profile-pic img-fluid"/>
+                    {% else %}
+                        <img src="https://via.placeholder.com/150" alt="Profile Picture" class="profile-pic">
+                    {% endif %}
+                {% endif %}
+
+            </div>
+            <div class="profile-info">
+                <h4>Welcome "{{ user.username }}"</h4>
+                <p>Category: {{ user.category }}</p>
+                <p>Email: {{ user.email }}</p>
+                {% if user.role == "sponsor" %}
+                    <p>Mobile: {{ user.mobile }}</p>
+                    <p>Target Audience:{{user.target}}</p>
+                {% else %}
+                    <p>Rating: {{ user.rating }}</p>
+                    <p>Followers: {{ user.followers }}</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="active-campaigns">
+            <h2>Active Campaigns:</h2>
+            <ul class="campaign-list">
+                {% for campaign in active_campaigns %}
+                <li class="campaign-item">
+                    <span class="campaign-title">{{ campaign.title }}</span> | Days left:
+                    {% set days_left = (campaign.end_date - now.date()).days %}
+                    {% if days_left > 0 %}
+                        <span class="badge badge-success">{{ days_left }} days to go</span>
+                    {% elif days_left == 0 %}
+                        <span class="badge badge-warning">Today</span>
+                    {% else %}
+                        <span class="badge badge-secondary">Completed</span>
+                    {% endif %}
+                    <a href="{{ url_for('view_campaign', campaign_id=campaign.id) }}" class="btn btn-info btn-sm">View</a>
+                </li>
+                {% endfor %}
+            </ul>
+            
+        </div>
+        <div class="new-requests">
+            <h2>New Requests:</h2>
+            <ul id="requests-list">
+                {% for request in new_requests %}
+                    <li id="request-{{ request.id }}" class="request-item">
+                        <span class="request-title">{{ request.title }}</span>
+                        <a href="{{ url_for('view_campaign', campaign_id=request.campaign_id) }}" class="btn btn-info btn-sm">View</a>
+                        <form method="POST" action="{{ url_for('accept_request') }}" class="inline-form">
+                            <input type="hidden" name="request_id" value="{{ request.id }}">
+                            <button type="submit" class="btn btn-success">Accept</button>
+                        </form>
+                        <form method="POST" action="{{ url_for('reject_request') }}" class="inline-form">
+                            <input type="hidden" name="request_id" value="{{ request.id }}">
+                            <button type="submit" class="btn btn-danger">Reject</button>
+                        </form>
+                        <form method="POST" action="{{ url_for('negotiate_request') }}" class="inline-form">
+                            <input type="hidden" name="request_id" value="{{ request.id }}">
+                            <button type="submit" class="btn btn-warning">Negotiate</button>
+                        </form>
+                    </li>
+                {% endfor %}
+
+            </ul>
+        </div>
+        
+    </div>
+    <div class="container dashboard-section">
+        <h1 class="mb-4">Profile Update</h1>
+        <form action="{{ url_for('update_profile') }}" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" class="form-control" id="username" name="username" value="{{ user.username }}" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+            </div>
+            {% if user.role == 'sponsor' %}
+            <div class="form-group">
+                <label for="mobile">Mobile</label>
+                <input type="text" class="form-control" id="mobile" name="mobile" value="{{ user.mobile }}">
+            </div>
+            <div class="form-group">
+                <label for="target">Target Audience</label>
+                <input type="number" class="form-control" id="target" name="target" value="{{ user.target }}">
+            </div>
+            {% else %}
+            <div class="form-group">
+                <label for="rating">Rating</label>
+                <input type="number" class="form-control" id="rating" name="rating" value="{{ user.rating }}">
+            </div>
+            <div class="form-group">
+                <label for="followers">Followers</label>
+                <input type="number" class="form-control" id="followers" name="followers" value="{{ user.followers }}">
+            </div>
+            <div class="form-group">
+                <label for="languages">Languages</label>
+                <input type="text" class="form-control" id="languages" name="languages" value="{{ user.languages }}">
+            </div>
+            {% endif %}
+            <div class="form-group">
+                <label for="profile_pic">Profile Picture</label>
+                <input type="file" class="form-control-file" id="profile_pic" name="profile_pic">
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Update Profile</button>
+            
+        </form>
+        <!-- ... existing profile and campaign sections ... -->
+    </div>
+    </div>
+    
+    <!-- Include FontAwesome for the envelope icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    {% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+    <div class="flashes">
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <!-- JS Libraries -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.inline-form').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault(); // Prevent the default form submission
+                    
+                    const form = e.target;
+                    const url = form.action;
+                    const requestId = form.querySelector('input[name="request_id"]').value;
+                    const requestLi = document.querySelector(`#request-${requestId}`);
+                    
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: new URLSearchParams(new FormData(form)).toString()
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'accepted') {
+                            requestLi.innerHTML = `
+                                ${data.title} - Accepted
+                                <a href="/view_campaign/${data.campaign_id}" class="view-btn">View</a>
+                            `;
+                        } else if (data.status === 'rejected') {
+                            requestLi.innerHTML = `
+                                ${data.title} - Rejected
+                                <a href="/view_campaign/${data.campaign_id}" class="view-btn">View</a>
+                            `;
+                        } else if (data.status === 'negotiated') {
+                            requestLi.innerHTML = `
+                                ${data.title} - Negotiated
+                                <a href="/view_campaign/${data.campaign_id}" class="view-btn">View</a>
+                            `;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('There was an error processing your request.');
+                    });
+                });
+            });
+        });
+        
+    </script>
+    
+    
+    
+</body>
+</html>
